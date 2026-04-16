@@ -117,7 +117,7 @@ func _on_explosion_terminada():
 	
 	# Opcional: Si quieres que el nodo de la moto se elimine del juego por completo
 	# descomenta la siguiente línea:
-	# queue_free()
+	queue_free()
 
 # --------------------------------------------
 
