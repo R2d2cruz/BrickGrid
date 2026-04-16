@@ -1,0 +1,178 @@
+[gd_scene format=3 uid="uid://dy0cc4cry3pxu"]
+
+[ext_resource type="Script" uid="uid://58qedfg3ddxh" path="res://scripts/lightcycle.gd" id="1_4ame0"]
+[ext_resource type="Texture2D" uid="uid://5qfs7pd1cky1" path="res://assets/sprites/lightcycles/moto TRON black azure.png" id="2_6x1b2"]
+[ext_resource type="Texture2D" uid="uid://3grkmuct2nra" path="res://assets/sprites/lightcycles/moto TRON green.png" id="3_rnrjt"]
+[ext_resource type="Texture2D" uid="uid://bq4l84t2fm0py" path="res://assets/sprites/lightcycles/moto TRON black orange.png" id="4_xway4"]
+[ext_resource type="Texture2D" uid="uid://cc3inyuds7aiy" path="res://assets/sprites/lightcycles/moto TRON black red.png" id="5_5h2rm"]
+[ext_resource type="Texture2D" uid="uid://c80qwysy3a3m4" path="res://assets/sprites/lightcycles/moto TRON white.png" id="6_q2w4k"]
+[ext_resource type="Texture2D" uid="uid://cqgynk8uwinns" path="res://assets/sprites/lightcycles/moto TRON yellow.png" id="7_q246s"]
+[ext_resource type="Texture2D" uid="uid://c5wu1bdj0psp" path="res://assets/tilemaps/explotion/Free Smoke Fx  Pixel 05.png" id="8_4ame0"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0crcw"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_6x1b2")
+}],
+"loop": true,
+"name": &"blue",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_rnrjt")
+}],
+"loop": true,
+"name": &"green",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_xway4")
+}],
+"loop": true,
+"name": &"orange",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_5h2rm")
+}],
+"loop": true,
+"name": &"red",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_q2w4k")
+}],
+"loop": true,
+"name": &"white",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_q246s")
+}],
+"loop": true,
+"name": &"yellow",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hgnej"]
+radius = 50.0
+height = 350.0
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_6x1b2"]
+blend_mode = 1
+light_mode = 1
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rnrjt"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(0, 448, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xway4"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(64, 448, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5h2rm"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(128, 448, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q2w4k"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(192, 448, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q246s"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(256, 448, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wt03t"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(320, 448, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0crcw"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(384, 448, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hgnej"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(448, 448, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lr5wm"]
+atlas = ExtResource("8_4ame0")
+region = Rect2(512, 448, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0otf2"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_rnrjt")
+}, {
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_xway4")
+}, {
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_5h2rm")
+}, {
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_q2w4k")
+}, {
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_q246s")
+}, {
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_wt03t")
+}, {
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_0crcw")
+}, {
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_hgnej")
+}, {
+"duration": 0.5,
+"texture": SubResource("AtlasTexture_lr5wm")
+}],
+"loop": false,
+"name": &"explotion",
+"speed": 5.0
+}]
+
+[node name="lightcycle" type="CharacterBody2D" unique_id=191212615 node_paths=PackedStringArray("frontWheel", "backWheel", "motocycle", "explotion")]
+script = ExtResource("1_4ame0")
+frontWheel = NodePath("frontWheel")
+backWheel = NodePath("backWheel")
+motocycle = NodePath("cycle")
+explotion = NodePath("Explotion")
+
+[node name="cycle" type="AnimatedSprite2D" parent="." unique_id=355860958]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_0crcw")
+animation = &"yellow"
+
+[node name="frontWheel" type="Node2D" parent="." unique_id=1622228021]
+position = Vector2(0, -351)
+
+[node name="backWheel" type="Node2D" parent="." unique_id=27666206]
+position = Vector2(0, 351)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1908657037]
+position = Vector2(1, -167)
+shape = SubResource("CapsuleShape2D_hgnej")
+
+[node name="Explotion" type="AnimatedSprite2D" parent="." unique_id=881884480]
+visible = false
+modulate = Color(1, 1, 0, 1)
+material = SubResource("CanvasItemMaterial_6x1b2")
+position = Vector2(3.0517578e-05, -167)
+scale = Vector2(20, 20)
+sprite_frames = SubResource("SpriteFrames_0otf2")
+animation = &"explotion"
+frame = 1
+frame_progress = 0.9054957
