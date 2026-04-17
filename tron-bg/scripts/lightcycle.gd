@@ -7,18 +7,18 @@ extends CharacterBody2D
 @export var motocycle: AnimatedSprite2D
 @export var explotion: AnimatedSprite2D
 
-
 # Configuración visual
 @export_enum("red", "blue", "green", "yellow", "orange", "white") var color_moto: String = "blue"
-@export var grosor_estela: int = 4 # ¡Aumenta esto si quieres una línea mucho más gruesa!
+@export var grosor_estela: int = 4
 
-
+# --- NUEVAS VARIABLES PARA CONTROLES INDEPENDIENTES ---
+var input_left: String = "ui_left"
+var input_right: String = "ui_right"
 
 # Variables de movimiento
 var newBack: Vector2
 const SPEED = 2000.0
 
-# --- NUEVA VARIABLE DE ESTADO ---
 var esta_viva: bool = true 
 
 # Diccionario de colores
@@ -46,6 +46,7 @@ func _ready():
 	if motocycle:
 		motocycle.play(color_moto)
 		
+func configurar_inicio():
 	if tile_map:
 		global_position = global_position.snapped(Vector2(TILE_SIZE, TILE_SIZE))
 		var pos_local = tile_map.to_local(backWheel.global_position)
@@ -59,9 +60,9 @@ func _process(delta):
 		
 	var giro = 0
 	
-	if Input.is_action_just_pressed("ui_right"):
+	if Input.is_action_just_pressed(input_right):
 		giro = 90
-	elif Input.is_action_just_pressed("ui_left"):
+	elif Input.is_action_just_pressed(input_left):
 		giro = -90
 		
 	if giro != 0:
@@ -83,7 +84,6 @@ func _physics_process(delta: float) -> void:
 	velocity.x = round(velocity.x)
 	velocity.y = round(velocity.y)
 	
-	# move_and_slide() devuelve 'true' si colisionó con algo en este frame
 	var choco = move_and_slide()
 	
 	if choco:
@@ -95,15 +95,11 @@ func _physics_process(delta: float) -> void:
 
 func _explotar():
 	esta_viva = false
-	
-	# Hacemos invisible la moto (uso ambos nodos por si acaso)
 	if motocycle:
 		motocycle.visible = false
-		
-	# Hacemos visible la explosión y la reproducimos
 	if explotion:
 		explotion.visible = true
-		explotion.play() # Pon el nombre de tu animación entre comillas si no es "default", ej: play("boom")
+		explotion.play()
 
 func _on_explosion_terminada():
 	# La animación terminó, así que borramos todas las celdas que pintó esta moto
@@ -111,8 +107,6 @@ func _on_explosion_terminada():
 		for celda in celdas_pintadas:
 			# Poner el ID como -1 en un TileMapLayer significa "borrar"
 			tile_map.set_cell(celda, -1)
-			
-	# Vaciamos la lista de celdas
 	celdas_pintadas.clear()
 	
 	# Opcional: Si quieres que el nodo de la moto se elimine del juego por completo
@@ -137,7 +131,6 @@ func _pintar_estela():
 			celda_a_pintar.x += sign(celda_actual.x - celda_a_pintar.x)
 			_pintar_bloque_grueso(celda_a_pintar, id_del_atlas)
 			
-		# Rellenamos eje Y
 		while celda_a_pintar.y != celda_actual.y:
 			celda_a_pintar.y += sign(celda_actual.y - celda_a_pintar.y)
 			_pintar_bloque_grueso(celda_a_pintar, id_del_atlas)
@@ -145,15 +138,11 @@ func _pintar_estela():
 		ultima_celda = celda_actual
 
 func _pintar_bloque_grueso(celda_base: Vector2i, id_atlas: int):
-	# Calcula la mitad para centrar el bloque en la coordenada
 	var mitad = grosor_estela / 2
-	
-	# Crea un cuadrado perfecto de celdas basado en el tamaño de grosor_estela
 	for x in range(-mitad, grosor_estela - mitad):
 		for y in range(-mitad, grosor_estela - mitad):
 			var celda_final = celda_base + Vector2i(x, y)
 			
 			tile_map.set_cell(celda_final, id_atlas, Vector2i(0, 0))
-			# Evitamos llenar la lista de duplicados
 			if not celdas_pintadas.has(celda_final):
 				celdas_pintadas.append(celda_final)
