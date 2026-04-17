@@ -108,9 +108,7 @@ func _on_explosion_terminada():
 			# Poner el ID como -1 en un TileMapLayer significa "borrar"
 			tile_map.set_cell(celda, -1)
 	celdas_pintadas.clear()
-	
-	# Opcional: Si quieres que el nodo de la moto se elimine del juego por completo
-	# descomenta la siguiente línea:
+
 	queue_free()
 
 # --------------------------------------------
@@ -142,7 +140,6 @@ func _pintar_bloque_grueso(celda_base: Vector2i, id_atlas: int):
 	for x in range(-mitad, grosor_estela - mitad):
 		for y in range(-mitad, grosor_estela - mitad):
 			var celda_final = celda_base + Vector2i(x, y)
-			
 			tile_map.set_cell(celda_final, id_atlas, Vector2i(0, 0))
 			if not celdas_pintadas.has(celda_final):
 				celdas_pintadas.append(celda_final)
