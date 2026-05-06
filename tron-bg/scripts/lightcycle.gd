@@ -53,6 +53,7 @@ func configurar_inicio():
 		ultima_celda = tile_map.local_to_map(pos_local)
 		_pintar_bloque_grueso(ultima_celda, color_a_id[color_moto])
 
+@warning_ignore("unassigned_variable")
 func _process(delta):
 	# Si ya explotó, no permitimos girar ni pintar más
 	if not esta_viva:
@@ -75,6 +76,7 @@ func _process(delta):
 		
 		_pintar_estela()
 
+@warning_ignore("unassigned_variable")
 func _physics_process(delta: float) -> void:
 	# Si la moto explotó, detenemos el avance físico
 	if not esta_viva:
