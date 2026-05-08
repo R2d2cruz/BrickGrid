@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://73f8pyqmd42a" path="res://assets/sprites/lightdots/dot orange.png" id="5_a0y84"]
 [ext_resource type="Texture2D" uid="uid://cxmo6dybxxqqr" path="res://assets/sprites/lightdots/dot red.png" id="6_juk6g"]
 [ext_resource type="Texture2D" uid="uid://81nvrsgcw7p0" path="res://assets/sprites/lightdots/dot yellow.png" id="7_o666j"]
+[ext_resource type="AudioStream" uid="uid://c7cboskbx1n1g" path="res://assets/song/Tron Legacy 8 Bit End Credits Theme Extended.mp3" id="11_uaec7"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kxo1t"]
 texture = ExtResource("1_blj23")
@@ -111,3 +112,8 @@ tile_map_data = PackedByteArray("AAAqAEMAAAAHAAEAAAAqAEQAAAAHAAEAAAAqAEUAAAAHAAE
 tile_set = SubResource("TileSet_i4ic1")
 
 [node name="lightcycles" type="Node2D" parent="." unique_id=541280831]
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=124981475]
+stream = ExtResource("11_uaec7")
+volume_db = -4.0
+autoplay = true
