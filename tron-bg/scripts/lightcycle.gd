@@ -44,7 +44,9 @@ var color_a_id: Dictionary = {
 # --- VARIABLES DEL TILEMAP ---
 var celdas_pintadas: Array[Vector2i] = []
 var ultima_celda: Vector2i = Vector2i.MAX
-var TILE_SIZE: int = 54 
+var TILE_SIZE: int = 54
+
+signal moto_destruida(es_ia: bool, color: String)
 
 func _ready():
 	if explotion:
@@ -134,6 +136,7 @@ func _physics_process(delta: float) -> void:
 
 func _explotar():
 	esta_viva = false
+	moto_destruida.emit(es_ia, color_moto)
 	if motocycle:
 		motocycle.visible = false
 	if explotion:

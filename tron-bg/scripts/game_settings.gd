@@ -7,6 +7,9 @@ var num_programas_ia: int = 0
 var dificultad_ia: String = "normal"
 var colores_elegidos: Array[String] = []
 
+var ultimo_ganador: String = ""
+var partida_jugada: bool = false
+
 # Gestión de colores
 var catalogo_colores: Dictionary = {
 	"BLANCO": "white", "AZUL": "blue", "AMARILLO": "yellow", 
