@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://dod2q84p2c7do" path="res://scripts/the_grid.gd" id="1_g13kd"]
 [ext_resource type="PackedScene" uid="uid://dy0cc4cry3pxu" path="res://scenes/entities/lightcycle.tscn" id="1_ohgb7"]
 [ext_resource type="Texture2D" uid="uid://dvsm3npfud1sb" path="res://assets/sprites/lightdots/dot blue.png" id="2_vvfj7"]
+[ext_resource type="Texture2D" uid="uid://dmfkgwbhscopv" path="res://assets/sprites/Black.png" id="3_4owm4"]
 [ext_resource type="Texture2D" uid="uid://dc2nvauilg4cw" path="res://assets/sprites/lightdots/dot green.png" id="3_g13kd"]
 [ext_resource type="Texture2D" uid="uid://dlywaitf5hbjk" path="res://assets/sprites/lightdots/dot light blue.png" id="4_wuy70"]
 [ext_resource type="Texture2D" uid="uid://73f8pyqmd42a" path="res://assets/sprites/lightdots/dot orange.png" id="5_a0y84"]
@@ -88,6 +89,12 @@ script = ExtResource("1_g13kd")
 lightcycles = NodePath("lightcycles")
 escena_moto = ExtResource("1_ohgb7")
 lines = NodePath("lines")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1931462815]
+z_index = -1
+position = Vector2(155, 258.5)
+scale = Vector2(94.015625, 55.27539)
+texture = ExtResource("3_4owm4")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1109410196]
 zoom = Vector2(0.025, 0.025)
