@@ -112,7 +112,6 @@ func _process(delta):
 		global_position = global_position.snapped(Vector2(TILE_SIZE, TILE_SIZE))
 		
 		if es_ia:
-			# Multiplicado por 1.1: Obligamos a la moto a cruzar toda la celda antes de volver a girar
 			cooldown_ia = (float(TILE_SIZE) / SPEED) * 1.1
 			
 		_pintar_estela()
@@ -199,7 +198,6 @@ func _pensar_ia() -> int:
 		
 		if area_izq > area_der: return -90
 		elif area_der > area_izq: return 90
-		# Si ambas son iguales (incluso 0 porque está acorralada), elige al azar para no morir recta
 		elif randf() > 0.5: return 90
 		else: return -90
 
@@ -209,14 +207,13 @@ func _pensar_ia() -> int:
 		var area_izq = _medir_area_disponible(pos_inicio, dir_izq)
 		var area_der = _medir_area_disponible(pos_inicio, dir_der)
 		
-		# Penalizamos el frente al 70% porque sabemos que tarde o temprano se acaba
 		var mayor_area = max(area_frente * 0.7, max(area_izq, area_der))
 		
 		if mayor_area == area_izq and area_izq > 0: return -90
 		elif mayor_area == area_der and area_der > 0: return 90
 		else: return 0 
 			
-	# 3. MODO CAZA ESTRATÉGICO
+	# 3. MODO CAZA ESTRATÉGICO PARA TODOS
 	elif dificultad_ia == "dificil" and randf() < 0.1: 
 		var presa = _buscar_presa()
 		if presa:
@@ -271,7 +268,6 @@ func _es_celda_ocupada(celda: Vector2i) -> bool:
 	if parent:
 		for otra_moto in parent.get_children():
 			if otra_moto != self and otra_moto.get("esta_viva"):
-				# Espacio personal más amplio (1.5 tiles)
 				if posicion_global_celda.distance_to(otra_moto.global_position) < (TILE_SIZE * 1.5):
 					return true
 					
@@ -281,7 +277,6 @@ func _medir_distancia_libre(origen: Vector2, direccion: Vector2, max_distancia_t
 	var max_distancia_px = max_distancia_tiles * TILE_SIZE
 	var space_state = get_world_2d().direct_space_state
 	
-	# REDUCIDO DE 0.4 A 0.2: Los rayos laterales ya no rozarán las paredes paralelas
 	var offset_lateral = direccion.rotated(PI/2) * (TILE_SIZE * 0.2) 
 	
 	var origenes_rayos = [
@@ -314,7 +309,8 @@ func _buscar_presa() -> CharacterBody2D:
 	var menor_distancia = 99999.0
 	
 	for moto in parent.get_children():
-		if moto != self and moto.get("esta_viva") and moto.get("es_ia") == false:
+		# AHORA ATACA A CUALQUIERA: Se eliminó la condición que solo permitía atacar a jugadores (!es_ia)
+		if moto != self and moto.get("esta_viva"):
 			var dist = global_position.distance_to(moto.global_position)
 			if dist < menor_distancia:
 				menor_distancia = dist
