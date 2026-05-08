@@ -64,13 +64,13 @@ func _configurar_dificultad():
 	match dificultad_ia:
 		"facil":
 			distancia_vision = 3
-			probabilidad_error = 0.15 # 15% de probabilidad de no reaccionar a tiempo
+			probabilidad_error = 0.15 
 		"normal":
 			distancia_vision = 6
-			probabilidad_error = 0.02 # Un margen de error muy pequeño
+			probabilidad_error = 0.02 
 		"dificil":
 			distancia_vision = 12
-			probabilidad_error = 0.0  # Juego perfecto, ve muy lejos y no se equivoca
+			probabilidad_error = 0.0  
 		
 func configurar_inicio():
 	if tile_map:
@@ -84,18 +84,15 @@ func _process(delta):
 	if not esta_viva:
 		return
 		
-	# Reducimos el temporizador de la IA
 	if cooldown_ia > 0:
 		cooldown_ia -= delta
 		
 	var giro = 0
 	
-	# Si es IA y puede pensar, decide si girar
 	if es_ia:
 		if cooldown_ia <= 0:
 			giro = _pensar_ia()
 	else:
-		# Controles del jugador real
 		if Input.is_action_just_pressed(input_right):
 			giro = 90
 		elif Input.is_action_just_pressed(input_left):
@@ -104,27 +101,24 @@ func _process(delta):
 	if giro != 0:
 		_pintar_estela()
 		
-		# --- PARCHE ANTI-GLITCH ---
 		var futura_pos = frontWheel.global_position + (Vector2.UP.rotated(rotation + deg_to_rad(giro)) * TILE_SIZE)
 		if tile_map and _es_celda_ocupada(tile_map.local_to_map(tile_map.to_local(futura_pos))):
-			_explotar() # Intentó saltar un muro girando, la destruimos.
+			_explotar() 
 			return
-		# --------------------------
 		
 		newBack = frontWheel.global_position
 		rotation_degrees += giro
 		global_position = newBack + (global_position - backWheel.global_position)
 		global_position = global_position.snapped(Vector2(TILE_SIZE, TILE_SIZE))
 		
-		# Le damos un respiro a la IA después de girar (Ajustado dinámicamente a la velocidad)
 		if es_ia:
-			cooldown_ia = (float(TILE_SIZE) / SPEED) * 0.8
+			# Multiplicado por 1.1: Obligamos a la moto a cruzar toda la celda antes de volver a girar
+			cooldown_ia = (float(TILE_SIZE) / SPEED) * 1.1
 			
 		_pintar_estela()
 
 @warning_ignore("unassigned_variable")
 func _physics_process(delta: float) -> void:
-	# Si la moto explotó, detenemos el avance físico
 	if not esta_viva:
 		return
 		
@@ -139,8 +133,6 @@ func _physics_process(delta: float) -> void:
 	else:
 		_pintar_estela()
 
-# --- NUEVAS FUNCIONES PARA LA DESTRUCCIÓN ---
-
 func _explotar():
 	esta_viva = false
 	moto_destruida.emit(es_ia, color_moto)
@@ -151,16 +143,11 @@ func _explotar():
 		explotion.play()
 
 func _on_explosion_terminada():
-	# La animación terminó, así que borramos todas las celdas que pintó esta moto
 	if tile_map:
 		for celda in celdas_pintadas:
-			# Poner el ID como -1 en un TileMapLayer significa "borrar"
 			tile_map.set_cell(celda, -1)
 	celdas_pintadas.clear()
-
 	queue_free()
-
-# --------------------------------------------
 
 func _pintar_estela():
 	if not tile_map: 
@@ -173,7 +160,6 @@ func _pintar_estela():
 		var id_del_atlas = color_a_id[color_moto]
 		var celda_a_pintar = ultima_celda
 		
-		# Rellenamos eje X
 		while celda_a_pintar.x != celda_actual.x:
 			celda_a_pintar.x += sign(celda_actual.x - celda_a_pintar.x)
 			_pintar_bloque_grueso(celda_a_pintar, id_del_atlas)
@@ -201,63 +187,67 @@ func _pensar_ia() -> int:
 	var direccion_actual = Vector2.UP.rotated(rotation).round()
 	var pos_inicio = frontWheel.global_position
 	
-	# AUMENTADO: A esa velocidad (2000), necesita al menos 3 o 4 celdas de anticipación para no estamparse
-	var peligro_inminente = _medir_distancia_libre(pos_inicio, direccion_actual, 4) < 3.5
+	var dist_frente = _medir_distancia_libre(pos_inicio, direccion_actual, 5)
 	
-	if peligro_inminente:
-		var dir_izq = direccion_actual.rotated(deg_to_rad(-90)).round()
-		var dir_der = direccion_actual.rotated(deg_to_rad(90)).round()
+	var dir_izq = direccion_actual.rotated(deg_to_rad(-90)).round()
+	var dir_der = direccion_actual.rotated(deg_to_rad(90)).round()
+
+	# 1. MODO PÁNICO: El muro está inminentemente cerca (< 1.8 tiles). ¡Fuerza el giro!
+	if dist_frente < 1.8:
+		var area_izq = _medir_area_disponible(pos_inicio, dir_izq, 50)
+		var area_der = _medir_area_disponible(pos_inicio, dir_der, 50)
 		
-		# ¡MAGIA!: En lugar de medir líneas rectas, medimos toda el ÁREA disponible (hasta 150 celdas)
+		if area_izq > area_der: return -90
+		elif area_der > area_izq: return 90
+		# Si ambas son iguales (incluso 0 porque está acorralada), elige al azar para no morir recta
+		elif randf() > 0.5: return 90
+		else: return -90
+
+	# 2. MODO EVASIÓN TEMPRANA: Ve el muro acercándose (< 4.0 tiles)
+	elif dist_frente < 4.0:
 		var area_frente = _medir_area_disponible(pos_inicio, direccion_actual)
 		var area_izq = _medir_area_disponible(pos_inicio, dir_izq)
 		var area_der = _medir_area_disponible(pos_inicio, dir_der)
 		
-		# Buscamos la dirección que nos dé la mayor cantidad de celdas para sobrevivir
-		var mayor_area = max(area_frente, max(area_izq, area_der))
+		# Penalizamos el frente al 70% porque sabemos que tarde o temprano se acaba
+		var mayor_area = max(area_frente * 0.7, max(area_izq, area_der))
 		
-		if mayor_area == area_izq:
-			return -90
-		elif mayor_area == area_der:
-			return 90
-		else:
-			return 0 # Si el frente sigue siendo el mejor (raro si hay peligro, pero posible)
+		if mayor_area == area_izq and area_izq > 0: return -90
+		elif mayor_area == area_der and area_der > 0: return 90
+		else: return 0 
 			
-	# MODO CAZA AGRESIVO (Solo en difícil)
-	elif dificultad_ia == "dificil" and randf() < 0.1: # 10% de probabilidad de buscar caza
+	# 3. MODO CAZA ESTRATÉGICO
+	elif dificultad_ia == "dificil" and randf() < 0.1: 
 		var presa = _buscar_presa()
 		if presa:
 			var dir_hacia_presa = (presa.global_position - pos_inicio).normalized()
-			var dir_izq = direccion_actual.rotated(deg_to_rad(-90)).round()
-			var dir_der = direccion_actual.rotated(deg_to_rad(90)).round()
-			
 			var dot_izq = dir_izq.dot(dir_hacia_presa)
 			var dot_der = dir_der.dot(dir_hacia_presa)
 			
-			# Antes de atacar, se asegura de que el área hacia la que va a girar tenga al menos 40 celdas libres
-			if dot_izq > 0.5 and _medir_area_disponible(pos_inicio, dir_izq, 40) >= 40:
-				return -90
-			elif dot_der > 0.5 and _medir_area_disponible(pos_inicio, dir_der, 40) >= 40:
-				return 90
+			var area_frente = _medir_area_disponible(pos_inicio, direccion_actual, 100)
+			
+			if dot_izq > 0.5:
+				if _medir_distancia_libre(pos_inicio, dir_izq, 4) >= 3.5 and _medir_area_disponible(pos_inicio, dir_izq, 100) >= (area_frente * 0.4):
+					return -90
+			elif dot_der > 0.5:
+				if _medir_distancia_libre(pos_inicio, dir_der, 4) >= 3.5 and _medir_area_disponible(pos_inicio, dir_der, 100) >= (area_frente * 0.4):
+					return 90
 
 	return 0
 
-# --- EL ALGORITMO FLOOD FILL ---
 func _medir_area_disponible(pos_inicio: Vector2, direccion: Vector2, limite_busqueda: int = 150) -> int:
 	var pos_local = tile_map.to_local(pos_inicio + (direccion * TILE_SIZE))
 	var celda_inicial = tile_map.local_to_map(pos_local)
 	
 	if _es_celda_ocupada(celda_inicial):
-		return 0 # Si el primer paso ya es muro, el área es 0
+		return 0 
 		
-	# Colas para el algoritmo BFS (Búsqueda a lo ancho)
 	var celdas_por_visitar = [celda_inicial]
 	var celdas_visitadas = {celda_inicial: true}
 	var area = 0
 	
 	var direcciones_vecinas = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
 	
-	# Mientras haya celdas por explorar y no superemos el límite (para no congelar el juego)
 	while celdas_por_visitar.size() > 0 and area < limite_busqueda:
 		var celda_actual = celdas_por_visitar.pop_front()
 		area += 1
@@ -273,18 +263,16 @@ func _medir_area_disponible(pos_inicio: Vector2, direccion: Vector2, limite_busq
 	return area
 
 func _es_celda_ocupada(celda: Vector2i) -> bool:
-	# 1. Revisa las estelas
 	if tile_map.get_cell_source_id(celda) != -1: return true
-	# 2. Revisa los bordes del mapa
 	if border_map.get_cell_source_id(celda) != -1: return true
 	
-	# 3. Revisa otras motos (para que no se choque con los cuerpos antes de que pinten)
 	var posicion_global_celda = tile_map.to_global(tile_map.map_to_local(celda))
 	var parent = get_parent()
 	if parent:
 		for otra_moto in parent.get_children():
 			if otra_moto != self and otra_moto.get("esta_viva"):
-				if posicion_global_celda.distance_to(otra_moto.global_position) < TILE_SIZE:
+				# Espacio personal más amplio (1.5 tiles)
+				if posicion_global_celda.distance_to(otra_moto.global_position) < (TILE_SIZE * 1.5):
 					return true
 					
 	return false
@@ -292,7 +280,9 @@ func _es_celda_ocupada(celda: Vector2i) -> bool:
 func _medir_distancia_libre(origen: Vector2, direccion: Vector2, max_distancia_tiles: int) -> float:
 	var max_distancia_px = max_distancia_tiles * TILE_SIZE
 	var space_state = get_world_2d().direct_space_state
-	var offset_lateral = direccion.rotated(PI/2) * (TILE_SIZE * 0.4) 
+	
+	# REDUCIDO DE 0.4 A 0.2: Los rayos laterales ya no rozarán las paredes paralelas
+	var offset_lateral = direccion.rotated(PI/2) * (TILE_SIZE * 0.2) 
 	
 	var origenes_rayos = [
 		origen, 
