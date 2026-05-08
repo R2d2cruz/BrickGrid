@@ -11,41 +11,31 @@ extends Node2D
 const TILE_SIZE: int = 54
 
 func _ready() -> void:
-	iniciar_partida(["blue", "orange", "white", "green"])
+	var lista_colores = GameSettings.get_lista_completa_colores()
+	iniciar_partida(lista_colores)
 
 func iniciar_partida(colores: Array[String]):
-	var controles_jugadores = [
-		{"left": "p1_left", "right": "p1_right"}, 
-		{"left": "p2_left", "right": "p2_right"},
-		{"left": "p3_left", "right": "p3_right"},
-		{"left": "p4_left", "right": "p4_right"}  
-	]
-
-	# Configuramos P1 como jugador, y los demás como IA
-	var is_ai_list = [false, true, true, true] 
+	var total_motos = colores.size()
 	
-	# Definimos la dificultad inicial para las IAs (luego el menú cambiará esto)
-	var diff_list = ["", "facil", "normal", "dificil"]
-
 	for hijo in lightcycles.get_children():
 		hijo.queue_free()
 		
-	for i in range(colores.size()):
+	for i in range(total_motos):
 		var nueva_moto = escena_moto.instantiate()
 		nueva_moto.color_moto = colores[i]
-		
-		# Asignamos AMBOS TileMaps
 		nueva_moto.tile_map = lines
-		nueva_moto.border_map = borders 
+		nueva_moto.border_map = borders
 		
-		if i < is_ai_list.size():
-			nueva_moto.es_ia = is_ai_list[i]
-			if nueva_moto.es_ia:
-				nueva_moto.dificultad_ia = diff_list[i]
-		
-		if not nueva_moto.es_ia and i < controles_jugadores.size():
-			nueva_moto.input_left = controles_jugadores[i]["left"]
-			nueva_moto.input_right = controles_jugadores[i]["right"]
+		# Determinamos si es IA o Jugador Real
+		if i >= GameSettings.num_jugadores_reales:
+			nueva_moto.es_ia = true
+			nueva_moto.dificultad_ia = GameSettings.dificultad_ia
+		else:
+			nueva_moto.es_ia = false
+			# --- CAMBIO: Pedimos los controles a GameSettings ---
+			var controles = GameSettings.get_controles(i)
+			nueva_moto.input_left = controles["left"]
+			nueva_moto.input_right = controles["right"]
 			
 		lightcycles.add_child(nueva_moto)
 		
