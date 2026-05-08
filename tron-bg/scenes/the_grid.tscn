@@ -84,11 +84,12 @@ sources/4 = SubResource("TileSetAtlasSource_feva8")
 sources/5 = SubResource("TileSetAtlasSource_tfb8h")
 sources/6 = SubResource("TileSetAtlasSource_ibokt")
 
-[node name="TheGrid" type="Node2D" unique_id=298963135 node_paths=PackedStringArray("lightcycles", "lines")]
+[node name="TheGrid" type="Node2D" unique_id=298963135 node_paths=PackedStringArray("lightcycles", "lines", "borders")]
 script = ExtResource("1_g13kd")
 lightcycles = NodePath("lightcycles")
 escena_moto = ExtResource("1_ohgb7")
 lines = NodePath("lines")
+borders = NodePath("borders")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1931462815]
 z_index = -1

@@ -3,9 +3,10 @@ extends Node2D
 @export var lightcycles: Node2D
 @export var escena_moto: PackedScene
 @export var lines: TileMapLayer
+@export var borders: TileMapLayer
 
 @export var centro_mapa: Vector2 = Vector2(0, 0) 
-@export var distancia_spawn: float = 3240.0 
+@export var distancia_spawn: float = 4860.0 
 
 const TILE_SIZE: int = 54
 
@@ -13,25 +14,36 @@ func _ready() -> void:
 	iniciar_partida(["blue", "orange", "white", "green"])
 
 func iniciar_partida(colores: Array[String]):
-	# Definimos los "nombres" de los inputs para cada jugador posible
 	var controles_jugadores = [
-		{"left": "p1_left", "right": "p1_right"}, # Jugador 1 (ej: A y D)
-		{"left": "p2_left", "right": "p2_right"}, # Jugador 2 (ej: Flechas Izq y Der)
-		{"left": "p3_left", "right": "p3_right"}, # Jugador 3 (ej: J y L)
-		{"left": "p4_left", "right": "p4_right"}  # Jugador 4 (ej: Numpad 4 y 6)
+		{"left": "p1_left", "right": "p1_right"}, 
+		{"left": "p2_left", "right": "p2_right"},
+		{"left": "p3_left", "right": "p3_right"},
+		{"left": "p4_left", "right": "p4_right"}  
 	]
+
+	# Configuramos P1 como jugador, y los demás como IA
+	var is_ai_list = [false, true, true, true] 
+	
+	# Definimos la dificultad inicial para las IAs (luego el menú cambiará esto)
+	var diff_list = ["", "facil", "normal", "dificil"]
 
 	for hijo in lightcycles.get_children():
 		hijo.queue_free()
 		
-	# Usamos un bucle for tradicional para saber qué número de moto estamos creando
 	for i in range(colores.size()):
 		var nueva_moto = escena_moto.instantiate()
 		nueva_moto.color_moto = colores[i]
-		nueva_moto.tile_map = lines
 		
-		# Asignamos los controles dependiendo del jugador (P1, P2, etc.)
-		if i < controles_jugadores.size():
+		# Asignamos AMBOS TileMaps
+		nueva_moto.tile_map = lines
+		nueva_moto.border_map = borders 
+		
+		if i < is_ai_list.size():
+			nueva_moto.es_ia = is_ai_list[i]
+			if nueva_moto.es_ia:
+				nueva_moto.dificultad_ia = diff_list[i]
+		
+		if not nueva_moto.es_ia and i < controles_jugadores.size():
 			nueva_moto.input_left = controles_jugadores[i]["left"]
 			nueva_moto.input_right = controles_jugadores[i]["right"]
 			

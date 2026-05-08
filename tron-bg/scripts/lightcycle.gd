@@ -1,5 +1,15 @@
 extends CharacterBody2D
 
+# --- NUEVAS REFERENCIAS PARA LA IA ---
+@export var border_map: TileMapLayer
+
+@export var es_ia: bool = false
+@export_enum("facil", "normal", "dificil") var dificultad_ia: String = "normal"
+
+var distancia_vision: int = 6
+var probabilidad_error: float = 0.0
+var cooldown_ia: float = 0.0
+
 # Referencias a los nodos de la moto y el mapa
 @export var frontWheel: Node2D
 @export var backWheel: Node2D
@@ -37,14 +47,28 @@ var ultima_celda: Vector2i = Vector2i.MAX
 var TILE_SIZE: int = 54 
 
 func _ready():
-	# 1. Nos aseguramos de ocultar la explosión al inicio
 	if explotion:
 		explotion.visible = false
-		# Conectamos la señal que avisa cuando la animación de explosión termina
 		explotion.animation_finished.connect(_on_explosion_terminada)
 		
 	if motocycle:
 		motocycle.play(color_moto)
+		
+	_configurar_dificultad()
+
+func _configurar_dificultad():
+	if not es_ia: return
+	
+	match dificultad_ia:
+		"facil":
+			distancia_vision = 3
+			probabilidad_error = 0.15 # 15% de probabilidad de no reaccionar a tiempo
+		"normal":
+			distancia_vision = 6
+			probabilidad_error = 0.02 # Un margen de error muy pequeño
+		"dificil":
+			distancia_vision = 12
+			probabilidad_error = 0.0  # Juego perfecto, ve muy lejos y no se equivoca
 		
 func configurar_inicio():
 	if tile_map:
@@ -55,17 +79,26 @@ func configurar_inicio():
 
 @warning_ignore("unassigned_variable")
 func _process(delta):
-	# Si ya explotó, no permitimos girar ni pintar más
 	if not esta_viva:
 		return
 		
+	# Reducimos el temporizador de la IA
+	if cooldown_ia > 0:
+		cooldown_ia -= delta
+		
 	var giro = 0
 	
-	if Input.is_action_just_pressed(input_right):
-		giro = 90
-	elif Input.is_action_just_pressed(input_left):
-		giro = -90
-		
+	# Si es IA y puede pensar, decide si girar
+	if es_ia:
+		if cooldown_ia <= 0:
+			giro = _pensar_ia()
+	else:
+		# Controles del jugador real
+		if Input.is_action_just_pressed(input_right):
+			giro = 90
+		elif Input.is_action_just_pressed(input_left):
+			giro = -90
+			
 	if giro != 0:
 		_pintar_estela()
 		
@@ -74,6 +107,10 @@ func _process(delta):
 		global_position = newBack + (global_position - backWheel.global_position)
 		global_position = global_position.snapped(Vector2(TILE_SIZE, TILE_SIZE))
 		
+		# Le damos un respiro a la IA después de girar
+		if es_ia:
+			cooldown_ia = 0.15 
+			
 		_pintar_estela()
 
 @warning_ignore("unassigned_variable")
@@ -145,3 +182,66 @@ func _pintar_bloque_grueso(celda_base: Vector2i, id_atlas: int):
 			tile_map.set_cell(celda_final, id_atlas, Vector2i(0, 0))
 			if not celdas_pintadas.has(celda_final):
 				celdas_pintadas.append(celda_final)
+				
+# --- FUNCIONES DE INTELIGENCIA ARTIFICIAL ---
+
+func _pensar_ia() -> int:
+	if not tile_map: return 0
+	
+	var direccion_actual = Vector2.UP.rotated(rotation).round()
+	
+	# NUEVO: Empezamos a medir desde la rueda delantera
+	var pos_inicio = frontWheel.global_position
+	
+	if _hay_peligro(pos_inicio, direccion_actual, distancia_vision):
+		# Simulamos el error humano/retraso en los reflejos
+		if randf() < probabilidad_error:
+			return 0 # Sigue derecho este frame (puede que se estrelle o gire en el siguiente)
+			
+		var dir_izquierda = direccion_actual.rotated(deg_to_rad(-90)).round()
+		var dir_derecha = direccion_actual.rotated(deg_to_rad(90)).round()
+		
+		var espacio_izq = _medir_espacio(pos_inicio, dir_izquierda)
+		var espacio_der = _medir_espacio(pos_inicio, dir_derecha)
+		
+		if espacio_izq > espacio_der:
+			return -90
+		elif espacio_der > espacio_izq:
+			return 90
+		else:
+			return 90 if randi() % 2 == 0 else -90
+			
+	return 0
+
+func _hay_peligro(pos_inicio: Vector2, direccion: Vector2, distancia: int) -> bool:
+	for i in range(1, distancia + 1):
+		var pos_futura = pos_inicio + (direccion * i * TILE_SIZE)
+		if _es_obstaculo(pos_futura):
+			return true
+	return false
+
+func _medir_espacio(pos_inicio: Vector2, direccion: Vector2) -> int:
+	var espacio = 0
+	for i in range(1, 20):
+		var pos_futura = pos_inicio + (direccion * i * TILE_SIZE)
+		if _es_obstaculo(pos_futura):
+			break 
+		espacio += 1
+	return espacio
+
+func _es_obstaculo(posicion_global: Vector2) -> bool:
+	# 1. Revisamos el mapa de estelas
+	if tile_map:
+		var pos_local = tile_map.to_local(posicion_global)
+		var celda = tile_map.local_to_map(pos_local)
+		if tile_map.get_cell_source_id(celda) != -1:
+			return true
+			
+	# 2. Revisamos el mapa de los bordes/paredes
+	if border_map:
+		var pos_local_borde = border_map.to_local(posicion_global)
+		var celda_borde = border_map.local_to_map(pos_local_borde)
+		if border_map.get_cell_source_id(celda_borde) != -1:
+			return true
+			
+	return false
