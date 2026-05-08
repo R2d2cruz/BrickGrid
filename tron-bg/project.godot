@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="TRON_BG"
-run/main_scene="res://scenes/the_grid.tscn"
+run/main_scene="uid://bsyk7u7a7vijd"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameSettings="*uid://kxj35c4xi4u7"
 
 [input]
 
