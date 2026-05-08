@@ -63,24 +63,24 @@ func _preparar_estado(nuevo_estado: MenuState) -> void:
 		MenuState.JUGAR:
 			if GameSettings.partida_jugada:
 				# Texto para cuando vuelve a jugar (Sin Bienvenido)
-				texto_base = "C:\\TRON_SYS> ¿INICIAR NUEVA SECUENCIA DE JUEGO?\n"
+				texto_base = "C:\\TRON_SYS> INICIAR NUEVA SECUENCIA DE JUEGO?\n"
 			else:
 				# Texto para la primera vez
-				texto_base = "BIENVENIDO " + GameSettings.nombre_jugador + "\n¿QUIERES JUGAR UN JUEGO?\n"
+				texto_base = "BIENVENIDO " + GameSettings.nombre_jugador + "\nQUIERES JUGAR UN JUEGO?\n"
 			opciones_actuales = ["SI", "NO"]
 		MenuState.NUM_JUGADORES:
-			texto_base = "¿CUANTOS USUARIOS HABRA EN LA RED?\n"
+			texto_base = "CUANTOS USUARIOS HABRA EN LA RED?\n"
 			opciones_actuales = ["1", "2", "4"]
 		MenuState.NUM_IA:
-			texto_base = "¿CUANTOS PROGRAMAS COMPETIRAN?\n"
+			texto_base = "CUANTOS PROGRAMAS COMPETIRAN?\n"
 			var jugadores = GameSettings.num_jugadores_reales
 			opciones_actuales = ["1", "3"] if jugadores == 1 else ["2"]
 		MenuState.DIFICULTAD:
-			texto_base = "¿DIFICULTAD DE LOS PROGRAMAS?\n"
+			texto_base = "DIFICULTAD DE LOS PROGRAMAS?\n"
 			opciones_actuales = ["FACIL", "NORMAL", "DIFICIL"]
 		MenuState.COLOR_JUGADOR:
 			var n = GameSettings.nombre_jugador if GameSettings.colores_elegidos.size() == 0 else "JUGADOR " + str(GameSettings.colores_elegidos.size() + 1)
-			texto_base = "¿COLOR DE MOTO PARA " + n + "?\n"
+			texto_base = "COLOR DE MOTO PARA " + n + "?\n"
 			opciones_actuales = GameSettings.get_colores_disponibles()
 	
 	_escribir_texto()
