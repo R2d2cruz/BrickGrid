@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://qfh5mx06j8he"]
+
+[ext_resource type="Script" uid="uid://coh3vdajcwdh" path="res://scripts/victoria_terminal.gd" id="1_r2tju"]
+[ext_resource type="FontFile" uid="uid://djflbjyl5ihhi" path="res://assets/fonts/Minecraft.ttf" id="2_rrg5m"]
+
+[node name="MenuTerminal" type="Control" unique_id=1461895625]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r2tju")
+
+[node name="Fondo" type="ColorRect" parent="." unique_id=335110090]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="PantallaTexto" type="RichTextLabel" parent="." unique_id=2103389920]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 64.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/default_color = Color(0, 1, 0.16470589, 1)
+theme_override_fonts/normal_font = ExtResource("2_rrg5m")
+theme_override_font_sizes/normal_font_size = 40
+
+[node name="TimerLetras" type="Timer" parent="." unique_id=1669854562]
+wait_time = 0.05
