@@ -15,7 +15,11 @@ var nombre_tipeado: String = "" # Aquí guardamos lo que el usuario escribe
 
 func _ready() -> void:
 	timer_letras.timeout.connect(_on_letra_escrita)
-	_preparar_estado(MenuState.INPUT_NOMBRE)
+	
+	if GameSettings.partida_jugada:
+		_preparar_estado(MenuState.JUGAR)
+	else:
+		_preparar_estado(MenuState.INPUT_NOMBRE)
 
 func _input(event: InputEvent) -> void:
 	if escribiendo: return 
@@ -57,7 +61,12 @@ func _preparar_estado(nuevo_estado: MenuState) -> void:
 		MenuState.INPUT_NOMBRE:
 			texto_base = "C:\\TRON_SYS> INSERTE NOMBRE DE USUARIO:\n"
 		MenuState.JUGAR:
-			texto_base = "BIENVENIDO " + GameSettings.nombre_jugador + "\n¿QUIERES JUGAR UN JUEGO?\n"
+			if GameSettings.partida_jugada:
+				# Texto para cuando vuelve a jugar (Sin Bienvenido)
+				texto_base = "C:\\TRON_SYS> ¿INICIAR NUEVA SECUENCIA DE JUEGO?\n"
+			else:
+				# Texto para la primera vez
+				texto_base = "BIENVENIDO " + GameSettings.nombre_jugador + "\n¿QUIERES JUGAR UN JUEGO?\n"
 			opciones_actuales = ["SI", "NO"]
 		MenuState.NUM_JUGADORES:
 			texto_base = "¿CUANTOS USUARIOS HABRA EN LA RED?\n"
@@ -65,7 +74,7 @@ func _preparar_estado(nuevo_estado: MenuState) -> void:
 		MenuState.NUM_IA:
 			texto_base = "¿CUANTOS PROGRAMAS COMPETIRAN?\n"
 			var jugadores = GameSettings.num_jugadores_reales
-			opciones_actuales = ["0", "1", "3"] if jugadores == 1 else ["0", "2"]
+			opciones_actuales = ["1", "3"] if jugadores == 1 else ["2"]
 		MenuState.DIFICULTAD:
 			texto_base = "¿DIFICULTAD DE LOS PROGRAMAS?\n"
 			opciones_actuales = ["FACIL", "NORMAL", "DIFICIL"]
